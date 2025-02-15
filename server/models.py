@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from flask_bcrypt import Bcrypt
 from config import Config
+from marshmallow import Schema, fields, ValidationError
 
 bcrypt = Bcrypt()
 
@@ -27,6 +28,15 @@ class User:
         }
 
 
+class UserSchema(Schema):
+    username = fields.String(required=True)
+    email = fields.Email(required=True)
+    password = fields.String(
+        required=True, load_only=True
+    )  # Hide password from response
+    is_admin = fields.Boolean(default=False)
+
+
 class Product:
     def __init__(self, name, price, description, image, stock):
         self.name = name
@@ -43,3 +53,11 @@ class Product:
             "image": self.image,
             "stock": self.stock,
         }
+
+
+class ProductSchema(Schema):
+    name = fields.String(required=True)
+    price = fields.Float(required=True)
+    description = fields.String(required=True)
+    image = fields.String(required=True)
+    stock = fields.Integer(required=True, validate=lambda x: x >= 0)
